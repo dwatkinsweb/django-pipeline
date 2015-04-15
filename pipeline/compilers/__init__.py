@@ -40,7 +40,7 @@ class Compiler(object):
                         infile = finders.find(input_path)
                     outfile = self.output_path(infile, compiler.output_extension)
                     outdated = compiler.is_outdated(input_path, output_path)
-                    compiler.compile_file(quote(infile), quote(outfile),
+                    compiler.compile_file(infile, outfile,
                         outdated=outdated, force=force)
                     return output_path
             else:
@@ -88,10 +88,10 @@ class CompilerBase(object):
 
 
 class SubProcessCompiler(CompilerBase):
-    def execute_command(self, command, content=None, cwd=None):
+    def execute_command(self, command, content=None, cwd=None, stdout=None):
         import subprocess
         pipe = subprocess.Popen(command, shell=True, cwd=cwd,
-                                stdout=subprocess.PIPE, stdin=subprocess.PIPE,
+                                stdout=stdout or subprocess.PIPE, stdin=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         if content:
             content = smart_bytes(content)

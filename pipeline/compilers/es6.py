@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import warnings
 
 from pipeline.conf import settings
 from pipeline.compilers import SubProcessCompiler
@@ -13,10 +14,10 @@ class ES6Compiler(SubProcessCompiler):
     def compile_file(self, infile, outfile, outdated=False, force=False):
         if not outdated and not force:
             return  # File doesn't need to be recompiled
-        command = "%s %s %s -o %s" % (
-            settings.PIPELINE_BABEL_BINARY,
-            settings.PIPELINE_BABEL_ARGUMENTS,
-            infile,
-            outfile
-        )
+        if isinstance(settings.PIPELINE_BABEL_ARGUMENTS, (str, unicode)):
+            warnings.warn("Use a list for settings.PIPELINE_BABEL_ARGUMENTS", DeprecationWarning)
+            arguments = [a for a in settings.PIPELINE_BABEL_ARGUMENTS.split(' ') if a]
+        else:
+            arguments = list(settings.PIPELINE_BABEL_ARGUMENTS)
+        command = [settings.PIPELINE_BABEL_BINARY] + arguments + [infile, '-o', outfile]
         return self.execute_command(command)
